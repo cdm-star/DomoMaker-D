@@ -1,6 +1,7 @@
 const models = require('../models');
 
 const Account = models.Account;
+const bcrypt = require('bcrypt');
 
 const loginPage = (req, res) => { return res.render('login'); }
 
@@ -77,10 +78,66 @@ const singup = async (req, res) => {
 
 };
 
+
+
+const changePassword = async (req, res) => {
+
+
+    const current = `${req.body.currentPassword}`;
+    const newPass = `${req.body.newPass}`;
+    const newPass2 = `${req.body.newPass2}`;
+
+    if (!current || !newPass || !newPass2) {
+        return res.status(400).json({
+            error:
+                ' All fields are required!'
+        });
+
+    }
+
+    if (newPass !== newPass2) {
+        return res.status(400).json({
+            error:
+                ' Passwords do not match!'
+        });
+    }
+
+
+    try {
+        const account = await Account.findOne({ _id: req.session.account._id });
+
+        if (!account) {
+            return res.status(400).json({ error: 'Account not found!' });
+        }
+        const match = await bcrypt.compare(current, account.password);
+
+        if (!match) {
+            return res.status(401).json({ error: 'Current password is incorrect!' });
+        }
+
+        const newHash = await Account.generateHash(newPass);
+        account.password = newHash;
+        await account.save();
+
+        req.session.destroy();
+        return res.json({ redirect: '/login' });
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: 'An error occured while changing your password!' });
+    }
+
+};
+
+
+
+
 module.exports = {
     loginPage,
     login,
     logout,
     singup,
+    changePassword,
+
 
 };

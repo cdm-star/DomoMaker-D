@@ -16,6 +16,11 @@ const DomoSchema = new mongoose.Schema({
         min: 0,
         required: true,
     },
+    food: {
+        type: String,
+        required: true,
+        set: setName,
+    },
     owner: {
         type: mongoose.Schema.ObjectId,
         required: true,
