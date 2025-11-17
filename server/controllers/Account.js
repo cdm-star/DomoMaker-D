@@ -1,7 +1,8 @@
+const bcrypt = require('bcrypt');
 const models = require('../models');
 
 const Account = models.Account;
-const bcrypt = require('bcrypt');
+
 
 const loginPage = (req, res) => { return res.render('login'); }
 
